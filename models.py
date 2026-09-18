@@ -1,12 +1,10 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
-# ورودی کاربر
 class TaskCreate(BaseModel):
     title: str
     description: str
 
-# خروجی کامل تسک
 class TaskResponse(BaseModel):
     id: int
     title: str
@@ -18,7 +16,6 @@ class TaskResponse(BaseModel):
     duplicate_warning: Optional[str] = None
     is_completed: bool = False
 
-# خروجی گزارش روزانه
 class DailySummaryResponse(BaseModel):
     total_tasks: int
     completed_tasks: int
