@@ -1,0 +1,25 @@
+[project]
+name = "taskmind"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mohammadsajjad", email = "mohammadsajjadmail@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+    "pydantic>=2.13.5",
+    "requests>=2.34.2",
+    "scikit-learn>=1.9.1",
+    "sqlalchemy>=2.0.54",
+    "streamlit>=1.64.0",
+    "uvicorn>=0.53.0",
+]
+
+[project.scripts]
+taskmind = "taskmind:main"
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"

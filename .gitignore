@@ -1,0 +1,33 @@
+# Python environment & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# uv Package Manager
+.uv/
+
+# SQLite Database (Prevent committing local database)
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables & local configuration
+.env
+.env.local
+
+# IDE & Editor specific settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Streamlit local settings
+.streamlit/secrets.toml
+
+# OS generated files
+.DS_Store
+Thumbs.db
