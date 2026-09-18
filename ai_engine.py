@@ -6,7 +6,6 @@ from typing import List, Tuple
 
 class TaskAIEngine:
     def __init__(self):
-        # ۱. داده‌های آموزشی برای اولویت‌بندی (Classification)
         self.priority_texts = [
             "fix critical database server crash immediately",
             "urgent security patch for payment gateway",
@@ -27,7 +26,6 @@ class TaskAIEngine:
             "Medium", "Medium", "Medium", "Medium"
         ]
         
-        # ۲. داده‌های آموزشی برای تخمین زمان بر حسب ساعت (Regression)
         self.estimation_texts = [
             "fix critical database server crash immediately", # 8.0 hours
             "urgent security patch for payment gateway",     # 6.0 hours
@@ -51,27 +49,21 @@ class TaskAIEngine:
         self._train_models()
 
     def _train_models(self):
-        # آموزش مدل اولویت‌بندی
         X_p = self.vectorizer.fit_transform(self.priority_texts)
         self.priority_model.fit(X_p, self.priority_labels)
         
-        # آموزش مدل تخمین زمان (Linear/Ridge Regression)
         X_e = self.vectorizer.transform(self.estimation_texts)
         self.estimation_model.fit(X_e, self.estimation_targets)
 
-    # پیش‌بینی اولویت با ML
     def predict_priority(self, text: str) -> str:
         X_test = self.vectorizer.transform([text])
         return self.priority_model.predict(X_test)[0]
 
-    # تخمین زمان کاملاً هوشمند با ML (Regression)
     def predict_estimation(self, text: str) -> float:
         X_test = self.vectorizer.transform([text])
         pred_hours = self.estimation_model.predict(X_test)[0]
-        # حداقل ۱ ساعت زمان برای کارهای خیلی کوچک
         return float(round(max(1.0, pred_hours), 1))
 
-    # شکستن پویا و هوشمند تسک بر اساس کلمات کلیدی
     def decompose_task(self, title: str, text: str) -> List[str]:
         full_text = f"{title} {text}".lower()
         if any(w in full_text for w in ["bug", "fix", "crash", "باگ", "خطا", "رفع"]):
