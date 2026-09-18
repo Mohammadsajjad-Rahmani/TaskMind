@@ -30,7 +30,7 @@ def get_tasks(db: Session = Depends(get_db)):
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     full_text = f"{task.title} {task.description}"  
     priority = ai_engine.predict_priority(full_text)
-    est_hours = ai_engine.predict_estimation(full_text)  # تخمین زمان با ML
+    est_hours = ai_engine.predict_estimation(full_text) 
     subtasks = ai_engine.decompose_task(task.title, full_text)
         
     all_db_tasks = db.query(TaskDB).all()
@@ -65,7 +65,6 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
         is_completed=db_task.is_completed
     )
 
-# 1. Endpoint تغییر وضعیت (انجام شد / در حال انجام)
 @app.patch("/tasks/{task_id}/toggle")
 def toggle_task_status(task_id: int, db: Session = Depends(get_db)):
     db_task = db.query(TaskDB).filter(TaskDB.id == task_id).first()
@@ -76,7 +75,6 @@ def toggle_task_status(task_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Status updated", "is_completed": db_task.is_completed}
 
-# 2. Endpoint حذف تسک
 @app.delete("/tasks/{task_id}")
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     db_task = db.query(TaskDB).filter(TaskDB.id == task_id).first()
