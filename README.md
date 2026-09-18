@@ -30,8 +30,8 @@ My main goal in building this project was to gain hands-on experience in API arc
 ## 🚀 How to Run Locally
 
 1. Clone the repository:
-git clone https://github.com/your-username/taskmind-ai.git
-cd taskmind-ai
+git clone https://github.com/Mohammadsajjad-Rahmani/TaskMind.git
+cd Taskmind
 
 2. Install dependencies automatically using uv:
 uv sync
