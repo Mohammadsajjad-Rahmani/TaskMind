@@ -5,6 +5,8 @@ Hi there! This project is a task management app built using FastAPI and Streamli
 
 My main goal in building this project was to gain hands-on experience in API architecture, database integration, and applying foundational Machine Learning algorithms to a real-world project.
 
+Current implementation performs in-memory similarity comparison and is intended for small datasets.
+
 ---
 
 ## 🛠️ Tech Stack
