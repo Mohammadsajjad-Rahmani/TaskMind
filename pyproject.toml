@@ -9,7 +9,10 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "fastapi[standard]>=0.141.1",
+    "passlib[bcrypt]>=1.7.4",
     "pydantic>=2.13.5",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.32",
     "requests>=2.34.2",
     "scikit-learn>=1.9.1",
     "sqlalchemy>=2.0.54",

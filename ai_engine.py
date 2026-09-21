@@ -85,7 +85,6 @@ class TaskAIEngine:
                 "ارزیابی و تست نهایی"
             ]
 
-    # بررسی تکراری بودن با Cosine Similarity
     def check_duplicate(self, new_text: str, existing_texts: List[str]) -> Tuple[bool, str]:
         if not existing_texts:
             return False, ""
