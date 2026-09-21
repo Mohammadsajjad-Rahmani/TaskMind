@@ -3,8 +3,21 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
 
-from database import get_db, TaskDB, UserDB
-from models import TaskCreate, TaskResponse, DailySummaryResponse, UserCreate, UserResponse, Token
+# ایمپورت مدل‌های دیتابیس
+from models import UserDB, TaskDB
+
+# ایمپورت اسکیمارهای پایدانتیک
+from schemas import (
+    UserCreate, 
+    UserResponse, 
+    Token, 
+    TaskCreate, 
+    TaskResponse, 
+    DailySummaryResponse
+)
+
+# ایمپورت دیتابیس
+from database import get_db
 from ai_engine import ai_engine
 from dependencies import get_current_user
 import auth
