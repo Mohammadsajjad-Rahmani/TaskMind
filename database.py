@@ -1,11 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
-# مسیر دیتابیس فایل SQLite
 SQLALCHEMY_DATABASE_URL = "sqlite:///./taskmind.db"
 
-# ساخت موتور دیتابیس (check_same_thread=False برای SQLite در FastAPI الزامی است)
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
@@ -13,7 +10,18 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# تعریف مدل دیتابیس (جدول tasks)
+# 1. جدول جدید کاربران
+class UserDB(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+
+    # ارتباط با تسک‌های مربوط به این کاربر
+    tasks = relationship("TaskDB", back_populates="owner")
+
+# 2. جدول تسک‌ها (با اضافه شدن Foreign Key)
 class TaskDB(Base):
     __tablename__ = "tasks"
 
@@ -22,15 +30,17 @@ class TaskDB(Base):
     description = Column(String)
     priority = Column(String)
     estimated_hours = Column(Float)
-    suggested_subtasks = Column(String)  # با کاراکتر | جدا می‌کنیم
+    suggested_subtasks = Column(String)
     is_duplicate = Column(Boolean, default=False)
     duplicate_warning = Column(String, nullable=True)
     is_completed = Column(Boolean, default=False)
 
-# ساخت جدول‌ها در صورت عدم وجود
+    # کلید خارجی و رابطه با کاربر
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner = relationship("UserDB", back_populates="tasks")
+
 Base.metadata.create_all(bind=engine)
 
-# Dependency برای مدیریت اتصال‌ها در FastAPI
 def get_db():
     db = SessionLocal()
     try:
