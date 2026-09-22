@@ -1,10 +1,20 @@
 from datetime import datetime, timedelta
 import bcrypt
 from jose import jwt
+import os
+from dotenv import load_dotenv
 
-SECRET_KEY = "YOUR_SUPER_SECRET_KEY_CHANGE_IN_PRODUCTION"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # ۲۴ ساعت اعتبار
+# بارگذاری متغیرها از فایل .env
+load_dotenv()
+
+# خواندن SECRET_KEY از محیط سیستم
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+
+if not SECRET_KEY:
+    raise ValueError("خطا: متغیر SECRET_KEY در فایل .env یا سیستم یافت نشد!")
+
 
 def hash_password(password: str) -> str:
     # تبدیل رشته به بایت و هش کردن

@@ -106,10 +106,6 @@ else:
                     st.write(f"**توضیحات:** {task['description']}")
                     if task.get('duplicate_warning'):
                         st.warning(task['duplicate_warning'])
-                    
-                    st.write("**زیرتسک‌های پیشنهادی AI:**")
-                    for sub in task.get('suggested_subtasks', []):
-                        st.write(f"- {sub}")
 
                     col1, col2 = st.columns(2)
                     with col1:
