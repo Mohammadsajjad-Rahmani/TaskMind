@@ -41,7 +41,6 @@ class TaskAIEngine:
         ]
         self.estimation_targets = [8.0, 6.0, 7.5, 1.0, 1.5, 1.0, 3.0, 4.0, 3.5, 12.0, 10.0]
 
-        # Vectorizer مشترک یا مجزا
         self.vectorizer = TfidfVectorizer()
         self.priority_model = LogisticRegression()
         self.estimation_model = Ridge()
@@ -63,27 +62,6 @@ class TaskAIEngine:
         X_test = self.vectorizer.transform([text])
         pred_hours = self.estimation_model.predict(X_test)[0]
         return float(round(max(1.0, pred_hours), 1))
-
-    def decompose_task(self, title: str, text: str) -> List[str]:
-        full_text = f"{title} {text}".lower()
-        if any(w in full_text for w in ["bug", "fix", "crash", "باگ", "خطا", "رفع"]):
-            return [
-                f"بازسازی و ردیابی خطا برای '{title}'",
-                "تحلیل و ارائه راهکار رفع باگ",
-                "اجرای تست صحت عملکرد (Regression Testing)"
-            ]
-        elif any(w in full_text for w in ["doc", "readme", "مستندات", "توضیحات"]):
-            return [
-                f"جمع‌آوری تغییرات مرتبط با '{title}'",
-                "بروزرسانی فایل مستندات و نمونه کدها",
-                "بازبینی نهایی و Commit در Git"
-            ]
-        else:
-            return [
-                f"تحلیل نیازمندی‌های اولیه '{title}'",
-                "پیاده‌سازی کد اصلی و Logic",
-                "ارزیابی و تست نهایی"
-            ]
 
     def check_duplicate(self, new_text: str, existing_texts: List[str]) -> Tuple[bool, str]:
         if not existing_texts:
