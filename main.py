@@ -58,23 +58,7 @@ def get_tasks(
     db: Session = Depends(get_db),
     current_user: UserDB = Depends(get_current_user)
 ):
-    # دریافت تسک‌های اختصاصی کاربر جاری
-    tasks = db.query(TaskDB).filter(TaskDB.user_id == current_user.id).all()
-    result = []
-    for t in tasks:
-        subtasks_list = t.suggested_subtasks.split("|") if t.suggested_subtasks else []
-        result.append(TaskResponse(
-            id=t.id,
-            title=t.title,
-            description=t.description,
-            priority=t.priority,
-            estimated_hours=t.estimated_hours,
-            suggested_subtasks=subtasks_list,
-            is_duplicate=t.is_duplicate,
-            duplicate_warning=t.duplicate_warning,
-            is_completed=t.is_completed
-        ))
-    return result
+    return db.query(TaskDB).filter(TaskDB.user_id == current_user.id).all()
 
 @app.post("/tasks", response_model=TaskResponse)
 def create_task(
@@ -85,41 +69,27 @@ def create_task(
     full_text = f"{task.title} {task.description}"  
     priority = ai_engine.predict_priority(full_text)
     est_hours = ai_engine.predict_estimation(full_text) 
-    subtasks = ai_engine.decompose_task(task.title, full_text)
         
     # بررسی تکراری بودن فقط در میان تسک‌های همین کاربر
     user_tasks = db.query(TaskDB).filter(TaskDB.user_id == current_user.id).all()
     existing_texts = [f"{t.title} {t.description}" for t in user_tasks]
     is_dup, dup_warning = ai_engine.check_duplicate(full_text, existing_texts)
     
-    subtasks_str = "|".join(subtasks)
-    
     db_task = TaskDB(
         title=task.title,
         description=task.description,
         priority=priority,
         estimated_hours=est_hours,
-        suggested_subtasks=subtasks_str,
         is_duplicate=is_dup,
         duplicate_warning=dup_warning if is_dup else None,
         is_completed=False,
-        user_id=current_user.id  # ذخیره شناسه کاربر مالک
+        user_id=current_user.id
     )
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
     
-    return TaskResponse(
-        id=db_task.id,
-        title=db_task.title,
-        description=db_task.description,
-        priority=db_task.priority,
-        estimated_hours=db_task.estimated_hours,
-        suggested_subtasks=subtasks,
-        is_duplicate=db_task.is_duplicate,
-        duplicate_warning=db_task.duplicate_warning,
-        is_completed=db_task.is_completed
-    )
+    return db_task
 
 @app.patch("/tasks/{task_id}/toggle")
 def toggle_task_status(
@@ -127,7 +97,6 @@ def toggle_task_status(
     db: Session = Depends(get_db),
     current_user: UserDB = Depends(get_current_user)
 ):
-    # اطمینان از اینکه تسک متعلق به کاربر جاری است
     db_task = db.query(TaskDB).filter(TaskDB.id == task_id, TaskDB.user_id == current_user.id).first()
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found or unauthorized")
