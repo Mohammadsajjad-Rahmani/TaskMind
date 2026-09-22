@@ -9,7 +9,7 @@ st.set_page_config(page_title="TaskMind AI", page_icon="🧠", layout="wide")
 if "token" not in st.session_state:
     st.session_state.token = None
 
-# تابع کمکی برای ساخت هدر احراز هویت
+# تابع ای کمکی برای ساخت هدر احراز هویت
 def get_auth_headers():
     if st.session_state.token:
         return {"Authorization": f"Bearer {st.session_state.token}"}
