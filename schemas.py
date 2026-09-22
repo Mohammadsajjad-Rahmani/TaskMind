@@ -29,7 +29,6 @@ class TaskResponse(BaseModel):
     description: str
     priority: str
     estimated_hours: float
-    suggested_subtasks: List[str]
     is_duplicate: bool
     duplicate_warning: Optional[str] = None
     is_completed: bool = False
