@@ -20,7 +20,6 @@ class TaskDB(Base):
     description = Column(String)
     priority = Column(String)
     estimated_hours = Column(Float)
-    suggested_subtasks = Column(String)
     is_duplicate = Column(Boolean, default=False)
     duplicate_warning = Column(String, nullable=True)
     is_completed = Column(Boolean, default=False)
