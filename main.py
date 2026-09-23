@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
@@ -17,10 +18,12 @@ from schemas import (
 )
 
 # ایمپورت دیتابیس
-from database import get_db
+from database import get_db, engine, Base
 from ai_engine import ai_engine
 from dependencies import get_current_user
 import auth
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="TaskMind API with Auth", version="3.2.0")
 
@@ -55,10 +58,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 @app.get("/tasks", response_model=List[TaskResponse])
 def get_tasks(
-    db: Session = Depends(get_db),
     current_user: UserDB = Depends(get_current_user)
 ):
-    return db.query(TaskDB).filter(TaskDB.user_id == current_user.id).all()
+    # دریافت مستقیم از رابطه ORM (بدون نیاز به کوئری صریح)
+    return current_user.tasks
 
 @app.post("/tasks", response_model=TaskResponse)
 def create_task(
@@ -70,9 +73,8 @@ def create_task(
     priority = ai_engine.predict_priority(full_text)
     est_hours = ai_engine.predict_estimation(full_text) 
         
-    # بررسی تکراری بودن فقط در میان تسک‌های همین کاربر
-    user_tasks = db.query(TaskDB).filter(TaskDB.user_id == current_user.id).all()
-    existing_texts = [f"{t.title} {t.description}" for t in user_tasks]
+    # استفاده مستقیم از رابطه ORM برای چک کردن تکراری‌ها
+    existing_texts = [f"{t.title} {t.description}" for t in current_user.tasks]
     is_dup, dup_warning = ai_engine.check_duplicate(full_text, existing_texts)
     
     db_task = TaskDB(
@@ -83,7 +85,7 @@ def create_task(
         is_duplicate=is_dup,
         duplicate_warning=dup_warning if is_dup else None,
         is_completed=False,
-        user_id=current_user.id
+        owner=current_user  # به جای user_id=current_user.id می‌توان مستقیم خود شیء کاربر را پاس داد
     )
     db.add(db_task)
     db.commit()
@@ -97,13 +99,14 @@ def toggle_task_status(
     db: Session = Depends(get_db),
     current_user: UserDB = Depends(get_current_user)
 ):
+    # کوئری زدن مستقیم روی دیتابیس برای پیدا کردن یک تسک خاص و احراز مالکیت همچنان روش سریع‌تر و استانداردتری است
     db_task = db.query(TaskDB).filter(TaskDB.id == task_id, TaskDB.user_id == current_user.id).first()
     if not db_task:
-        raise HTTPException(status_code=404, detail="Task not found or unauthorized")
+        raise HTTPException(status_code=404, detail="تسک یافت نشد یا شما دسترسی ندارید.")
     
     db_task.is_completed = not db_task.is_completed
     db.commit()
-    return {"message": "Status updated", "is_completed": db_task.is_completed}
+    return {"message": "وضعیت با موفقیت تغییر کرد", "is_completed": db_task.is_completed}
 
 @app.delete("/tasks/{task_id}")
 def delete_task(
@@ -113,18 +116,18 @@ def delete_task(
 ):
     db_task = db.query(TaskDB).filter(TaskDB.id == task_id, TaskDB.user_id == current_user.id).first()
     if not db_task:
-        raise HTTPException(status_code=404, detail="Task not found or unauthorized")
+        raise HTTPException(status_code=404, detail="تسک یافت نشد یا شما دسترسی ندارید.")
     
     db.delete(db_task)
     db.commit()
-    return {"message": "Task deleted successfully"}
+    return {"message": "تسک با موفقیت حذف شد"}
 
 @app.get("/daily-summary", response_model=DailySummaryResponse)
 def get_daily_summary(
-    db: Session = Depends(get_db),
     current_user: UserDB = Depends(get_current_user)
 ):
-    tasks = db.query(TaskDB).filter(TaskDB.user_id == current_user.id).all()
+    # دسترسی مستقیم به تسک‌های کاربر از طریق شیء current_user
+    tasks = current_user.tasks
     total = len(tasks)
     completed = sum(1 for t in tasks if t.is_completed)
     pending = total - completed
